@@ -1,0 +1,16 @@
+<svg width="1024" height="1024" viewBox="0 0 1024 1024" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background rounded rect -->
+  <rect width="1024" height="1024" rx="224" fill="white"/>
+
+  <!-- Yellow top layer -->
+  <path d="M 180 160 Q 180 140 200 130 L 824 130 Q 844 130 844 150 L 844 420 Q 680 500 512 460 Q 344 420 180 480 Z" fill="#F5D78E"/>
+
+  <!-- Purple middle layer -->
+  <path d="M 160 380 Q 240 310 512 360 Q 784 410 864 330 L 864 600 Q 740 700 512 660 Q 284 620 160 720 Z" fill="#8B7FD4"/>
+
+  <!-- Black bottom layer with checkmark -->
+  <path d="M 150 600 Q 270 500 512 550 Q 754 600 874 500 L 874 800 Q 874 880 800 890 L 224 890 Q 150 880 150 800 Z" fill="#1A1A1A"/>
+
+  <!-- Checkmark -->
+  <path d="M 360 720 L 450 810 L 664 596" stroke="white" stroke-width="52" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+</svg>
