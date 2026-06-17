@@ -1,0 +1,50 @@
+{
+  "expo": {
+    "name": "My Tasks",
+    "slug": "my-tasks-app",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "automatic",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#000000"
+    },
+    "assetBundlePatterns": ["**/*"],
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.adel.mytasks"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#000000"
+      },
+      "package": "com.adel.mytasks",
+      "permissions": [
+        "READ_EXTERNAL_STORAGE",
+        "WRITE_EXTERNAL_STORAGE",
+        "CAMERA"
+      ]
+    },
+    "plugins": [
+      "expo-router",
+      "expo-font",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Allow My Tasks to access your photos."
+        }
+      ]
+    ],
+    "scheme": "mytasks",
+    "extra": {
+      "supabaseUrl": "https://lsfjiknffukkuvbinmpf.supabase.co",
+      "supabaseAnonKey": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxzZmppa25mZnVra3V2YmlubXBmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE2NDUxNTksImV4cCI6MjA5NzIyMTE1OX0.PbSlMxoVq-CFjolYFBoqL4EP72gnR6Ruaa2B3WVGY10",
+      "eas": {
+        "projectId": "YOUR_EAS_PROJECT_ID"
+      }
+    }
+  }
+}
