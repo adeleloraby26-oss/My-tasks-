@@ -10,17 +10,16 @@ import AuthScreen from '../src/screens/AuthScreen';
 import AppNavigator from './AppNavigator';
 
 export default function RootLayout() {
-  const isDarkMode  = useAppStore((s) => s.isDarkMode);
-  const setProfile  = useAppStore((s) => s.setProfile);
-  const isAuthLoaded = useAppStore((s) => s.isAuthLoaded);
-  const profile     = useAppStore((s) => s.profile);
-  const loadLocal   = useAppStore((s) => s.loadLocal);
+  const isDarkMode     = useAppStore((s) => s.isDarkMode);
+  const setProfile     = useAppStore((s) => s.setProfile);
+  const isAuthLoaded   = useAppStore((s) => s.isAuthLoaded);
+  const profile        = useAppStore((s) => s.profile);
+  const loadLocal      = useAppStore((s) => s.loadLocal);
   const syncFromServer = useAppStore((s) => s.syncFromServer);
-  const setOnline   = useAppStore((s) => s.setOnline);
-  const flushQueue  = useAppStore((s) => s.flushQueue);
+  const setOnline      = useAppStore((s) => s.setOnline);
+  const flushQueue     = useAppStore((s) => s.flushQueue);
 
   useEffect(() => {
-    // Load local data first (instant)
     loadLocal();
 
     // Watch network
@@ -30,9 +29,25 @@ export default function RootLayout() {
       if (online) flushQueue();
     });
 
-    // Auth listener
+    // 1. جيب الـ session المحفوظة فوراً
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
+      if (session?.user) {
+        const { data } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', session.user.id)
+          .single();
+        setProfile(data || null);
+        syncFromServer();
+      } else {
+        setProfile(null);
+      }
+    });
+
+    // 2. استمع لأي تغيير في الـ auth (login / logout)
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
+        if (event === 'INITIAL_SESSION') return; // اتعالج فوق بـ getSession
         if (session?.user) {
           const { data } = await supabase
             .from('profiles')
