@@ -43,7 +43,7 @@
       "supabaseUrl": "https://lsfjiknffukkuvbinmpf.supabase.co",
       "supabaseAnonKey": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxzZmppa25mZnVra3V2YmlubXBmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE2NDUxNTksImV4cCI6MjA5NzIyMTE1OX0.PbSlMxoVq-CFjolYFBoqL4EP72gnR6Ruaa2B3WVGY10",
       "eas": {
-        "projectId": "YOUR_EAS_PROJECT_ID"
+        "projectId": "dd85a303-65e7-43a5-8715-70c679efd5f7"
       }
     }
   }
