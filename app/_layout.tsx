@@ -2,6 +2,7 @@ import 'react-native-gesture-handler';
 import React, { useEffect } from 'react';
 import { View, StyleSheet } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { NavigationContainer } from '@react-navigation/native';
 import { StatusBar } from 'expo-status-bar';
 import NetInfo from '@react-native-community/netinfo';
 import { supabase } from '../src/services/supabase';
@@ -22,14 +23,13 @@ export default function RootLayout() {
   useEffect(() => {
     loadLocal();
 
-    // Watch network
     const unsub = NetInfo.addEventListener((state) => {
       const online = !!state.isConnected;
       setOnline(online);
       if (online) flushQueue();
     });
 
-    // 1. جيب الـ session المحفوظة فوراً
+    // جيب الـ session المحفوظة فوراً
     supabase.auth.getSession().then(async ({ data: { session } }) => {
       if (session?.user) {
         const { data } = await supabase
@@ -44,10 +44,10 @@ export default function RootLayout() {
       }
     });
 
-    // 2. استمع لأي تغيير في الـ auth (login / logout)
+    // استمع لأي تغيير في الـ auth
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
-        if (event === 'INITIAL_SESSION') return; // اتعالج فوق بـ getSession
+        if (event === 'INITIAL_SESSION') return;
         if (session?.user) {
           const { data } = await supabase
             .from('profiles')
@@ -70,7 +70,13 @@ export default function RootLayout() {
   return (
     <GestureHandlerRootView style={styles.flex}>
       <StatusBar style={isDarkMode ? 'light' : 'dark'} />
-      {profile ? <AppNavigator /> : <AuthScreen />}
+      {profile ? (
+        <NavigationContainer>
+          <AppNavigator />
+        </NavigationContainer>
+      ) : (
+        <AuthScreen />
+      )}
     </GestureHandlerRootView>
   );
 }

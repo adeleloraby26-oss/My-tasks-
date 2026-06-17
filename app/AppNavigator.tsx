@@ -1,6 +1,5 @@
 import React from 'react';
 import { View, TouchableOpacity, StyleSheet, Text } from 'react-native';
-import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { Home, CheckSquare, BarChart2, User, Folder } from 'lucide-react-native';
@@ -34,11 +33,11 @@ function TasksStack() {
 function HomeStack() {
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
-      <Stack.Screen name="HomeMain"    component={HomeScreen} />
-      <Stack.Screen name="TasksNew"    component={NewTaskScreen}    options={{ presentation: 'modal' }} />
-      <Stack.Screen name="TaskDetail"  component={TaskDetailScreen} />
-      <Stack.Screen name="Boards"      component={BoardsScreen} />
-      <Stack.Screen name="Analytics"   component={AnalyticsScreen} />
+      <Stack.Screen name="HomeMain"   component={HomeScreen} />
+      <Stack.Screen name="TasksNew"   component={NewTaskScreen}    options={{ presentation: 'modal' }} />
+      <Stack.Screen name="TaskDetail" component={TaskDetailScreen} />
+      <Stack.Screen name="Boards"     component={BoardsScreen} />
+      <Stack.Screen name="Analytics"  component={AnalyticsScreen} />
     </Stack.Navigator>
   );
 }
@@ -56,21 +55,19 @@ export default function AppNavigator() {
   const theme      = isDarkMode ? DARK_THEME : LIGHT_THEME;
 
   return (
-    <NavigationContainer>
-      <View style={{ flex: 1 }}>
-        <OfflineBanner />
-        <Tab.Navigator
-          screenOptions={{ headerShown: false }}
-          tabBar={(props) => <CustomTabBar {...props} theme={theme} isDarkMode={isDarkMode} />}
-        >
-          {TABS.map((t) => (
-            <Tab.Screen key={t.name} name={t.name} component={t.component}
-              options={{ tabBarLabel: t.label, tabBarIcon: t.icon as any }}
-            />
-          ))}
-        </Tab.Navigator>
-      </View>
-    </NavigationContainer>
+    <View style={{ flex: 1 }}>
+      <OfflineBanner />
+      <Tab.Navigator
+        screenOptions={{ headerShown: false }}
+        tabBar={(props) => <CustomTabBar {...props} theme={theme} isDarkMode={isDarkMode} />}
+      >
+        {TABS.map((t) => (
+          <Tab.Screen key={t.name} name={t.name} component={t.component}
+            options={{ tabBarLabel: t.label, tabBarIcon: t.icon as any }}
+          />
+        ))}
+      </Tab.Navigator>
+    </View>
   );
 }
 
