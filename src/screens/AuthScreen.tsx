@@ -20,36 +20,13 @@ export default function AuthScreen() {
   const [username, setUsername] = useState('');
   const [loading,  setLoading]  = useState(false);
 
-  const handleResendConfirmation = async () => {
-    try {
-      const { error } = await supabase.auth.resend({ type: 'signup', email });
-      if (error) throw error;
-      Alert.alert('Sent!', 'A new confirmation email has been sent.');
-    } catch (e: any) {
-      Alert.alert('Error', e.message);
-    }
-  };
-
   const handleAuth = async () => {
     if (!email || !password) { Alert.alert('Error', 'Please fill all fields'); return; }
     setLoading(true);
     try {
       if (mode === 'login') {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
-        if (error) {
-          if (error.message.toLowerCase().includes('email not confirmed')) {
-            Alert.alert(
-              'Email Not Confirmed',
-              'Please confirm your email before logging in.',
-              [
-                { text: 'Resend Email', onPress: handleResendConfirmation },
-                { text: 'OK', style: 'cancel' },
-              ]
-            );
-          } else {
-            throw error;
-          }
-        }
+        if (error) throw error;
       } else {
         if (!username) { Alert.alert('Error', 'Username is required'); setLoading(false); return; }
         const { data, error } = await supabase.auth.signUp({
@@ -57,12 +34,12 @@ export default function AuthScreen() {
           options: { data: { username, display_name: username } },
         });
         if (error) throw error;
+        // لو الإيميل موجود أصلاً
         if (data?.user?.identities?.length === 0) {
           Alert.alert('Already Registered', 'This email is already registered. Please log in.');
           setMode('login');
-        } else {
-          Alert.alert('Success', 'Check your email to confirm your account!');
         }
+        // مفيش confirmation — الـ session هتتعمل تلقائياً
       }
     } catch (e: any) {
       Alert.alert('Error', e.message);
@@ -76,7 +53,6 @@ export default function AuthScreen() {
       <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
 
-          {/* Logo / Hero */}
           <Animated.View entering={FadeInDown.delay(0).springify()} style={styles.hero}>
             <LinearGradient colors={[COLORS.blue, COLORS.purple]} style={styles.logoBox}>
               <Text style={styles.logoText}>✓</Text>
@@ -85,12 +61,10 @@ export default function AuthScreen() {
             <Text style={styles.tagline}>Stay organized, stay productive</Text>
           </Animated.View>
 
-          {/* Card */}
           <Animated.View
             entering={FadeInDown.delay(150).springify()}
             style={[styles.card, { backgroundColor: theme.bgCard }]}
           >
-            {/* Mode toggle */}
             <View style={[styles.toggle, { backgroundColor: theme.bgInput }]}>
               {(['login', 'signup'] as const).map((m) => (
                 <TouchableOpacity
@@ -105,7 +79,6 @@ export default function AuthScreen() {
               ))}
             </View>
 
-            {/* Fields */}
             {mode === 'signup' && (
               <View style={styles.fieldGroup}>
                 <Text style={[styles.label, { color: theme.textSub }]}>Username</Text>
@@ -169,53 +142,26 @@ const styles = StyleSheet.create({
   bg:     { flex: 1 },
   flex:   { flex: 1 },
   scroll: { flexGrow: 1, justifyContent: 'center', padding: SPACING.xl },
-  hero: {
-    alignItems:   'center',
-    marginBottom: SPACING.xxxl,
-  },
+  hero:   { alignItems: 'center', marginBottom: SPACING.xxxl },
   logoBox: {
-    width:         72,
-    height:        72,
-    borderRadius:  RADIUS.xl,
-    justifyContent: 'center',
-    alignItems:     'center',
-    marginBottom:   SPACING.md,
+    width: 72, height: 72, borderRadius: RADIUS.xl,
+    justifyContent: 'center', alignItems: 'center', marginBottom: SPACING.md,
   },
   logoText:  { fontSize: 36, color: '#fff', fontWeight: '700' },
   appName:   { fontSize: FONTS.sizes.xxxl, fontWeight: '800', color: '#fff', letterSpacing: -0.5 },
   tagline:   { fontSize: FONTS.sizes.sm, color: 'rgba(255,255,255,0.5)', marginTop: SPACING.xs },
-  card: {
-    borderRadius: RADIUS.xl,
-    padding:      SPACING.xl,
-    gap:          SPACING.lg,
-  },
-  toggle: {
-    flexDirection: 'row',
-    borderRadius:  RADIUS.md,
-    padding:       3,
-  },
-  toggleBtn: {
-    flex:           1,
-    paddingVertical: SPACING.sm,
-    alignItems:     'center',
-    borderRadius:   RADIUS.sm,
-  },
+  card:      { borderRadius: RADIUS.xl, padding: SPACING.xl, gap: SPACING.lg },
+  toggle:    { flexDirection: 'row', borderRadius: RADIUS.md, padding: 3 },
+  toggleBtn: { flex: 1, paddingVertical: SPACING.sm, alignItems: 'center', borderRadius: RADIUS.sm },
   toggleActive: { backgroundColor: COLORS.blue },
   toggleText:   { fontSize: FONTS.sizes.sm, fontWeight: '600' },
   fieldGroup:   { gap: SPACING.xs },
   label:        { fontSize: FONTS.sizes.sm, fontWeight: '500' },
   input: {
-    borderRadius:    RADIUS.md,
-    borderWidth:     1,
-    paddingVertical: SPACING.sm + 2,
-    paddingHorizontal: SPACING.md,
-    fontSize:        FONTS.sizes.md,
+    borderRadius: RADIUS.md, borderWidth: 1,
+    paddingVertical: SPACING.sm + 2, paddingHorizontal: SPACING.md,
+    fontSize: FONTS.sizes.md,
   },
-  submitBtn: {
-    borderRadius:   RADIUS.md,
-    paddingVertical: SPACING.md,
-    alignItems:     'center',
-    marginTop:      SPACING.xs,
-  },
+  submitBtn:  { borderRadius: RADIUS.md, paddingVertical: SPACING.md, alignItems: 'center', marginTop: SPACING.xs },
   submitText: { color: '#fff', fontSize: FONTS.sizes.md, fontWeight: '700' },
 });
