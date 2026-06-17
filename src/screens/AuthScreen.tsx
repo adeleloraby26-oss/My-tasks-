@@ -20,21 +20,49 @@ export default function AuthScreen() {
   const [username, setUsername] = useState('');
   const [loading,  setLoading]  = useState(false);
 
+  const handleResendConfirmation = async () => {
+    try {
+      const { error } = await supabase.auth.resend({ type: 'signup', email });
+      if (error) throw error;
+      Alert.alert('Sent!', 'A new confirmation email has been sent.');
+    } catch (e: any) {
+      Alert.alert('Error', e.message);
+    }
+  };
+
   const handleAuth = async () => {
     if (!email || !password) { Alert.alert('Error', 'Please fill all fields'); return; }
     setLoading(true);
     try {
       if (mode === 'login') {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
-        if (error) throw error;
+        if (error) {
+          if (error.message.toLowerCase().includes('email not confirmed')) {
+            Alert.alert(
+              'Email Not Confirmed',
+              'Please confirm your email before logging in.',
+              [
+                { text: 'Resend Email', onPress: handleResendConfirmation },
+                { text: 'OK', style: 'cancel' },
+              ]
+            );
+          } else {
+            throw error;
+          }
+        }
       } else {
         if (!username) { Alert.alert('Error', 'Username is required'); setLoading(false); return; }
-        const { error } = await supabase.auth.signUp({
+        const { data, error } = await supabase.auth.signUp({
           email, password,
           options: { data: { username, display_name: username } },
         });
         if (error) throw error;
-        Alert.alert('Success', 'Check your email to confirm your account!');
+        if (data?.user?.identities?.length === 0) {
+          Alert.alert('Already Registered', 'This email is already registered. Please log in.');
+          setMode('login');
+        } else {
+          Alert.alert('Success', 'Check your email to confirm your account!');
+        }
       }
     } catch (e: any) {
       Alert.alert('Error', e.message);
