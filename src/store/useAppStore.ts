@@ -12,21 +12,17 @@ const STORAGE_KEYS = {
 };
 
 interface AppState {
-  // ── Auth ─────────────────────────────────────────────────────────────
   profile:      Profile | null;
   isAuthLoaded: boolean;
   setProfile:   (p: Profile | null) => void;
 
-  // ── Data ─────────────────────────────────────────────────────────────
   tasks:    Task[];
   boards:   Board[];
   isOnline: boolean;
 
-  // ── Theme ─────────────────────────────────────────────────────────────
   isDarkMode: boolean;
   toggleTheme: () => void;
 
-  // ── Actions ───────────────────────────────────────────────────────────
   loadLocal:      () => Promise<void>;
   syncFromServer: () => Promise<void>;
   addTask:        (task: Omit<Task, 'id' | 'created_at' | 'updated_at'>) => Promise<void>;
@@ -133,6 +129,14 @@ export const useAppStore = create<AppState>((set, get) => ({
           AsyncStorage.setItem(STORAGE_KEYS.tasks, JSON.stringify(tasks));
           return { tasks };
         });
+      } else {
+        // فشل الـ insert — شيل الـ optimistic وبلغ
+        set((s) => {
+          const tasks = s.tasks.filter((t) => t.id !== tempId);
+          AsyncStorage.setItem(STORAGE_KEYS.tasks, JSON.stringify(tasks));
+          return { tasks };
+        });
+        console.error('addTask error', error);
       }
     } else {
       enqueueOffline('create', 'tasks', { ...taskData, user_id: profile.id, _localId: tempId });
@@ -178,8 +182,15 @@ export const useAppStore = create<AppState>((set, get) => ({
 
     const tempId = `local_${Date.now()}`;
     const now    = new Date().toISOString();
-    const optimistic: Board = { ...boardData, id: tempId, created_at: now, updated_at: now } as Board;
+    const optimistic: Board = {
+      ...boardData,
+      user_id:    profile.id,
+      id:         tempId,
+      created_at: now,
+      updated_at: now,
+    } as Board;
 
+    // أضفه فوراً للـ UI
     set((s) => {
       const boards = [optimistic, ...s.boards];
       AsyncStorage.setItem(STORAGE_KEYS.boards, JSON.stringify(boards));
@@ -187,14 +198,37 @@ export const useAppStore = create<AppState>((set, get) => ({
     });
 
     if (isOnline) {
-      const { data } = await supabase.from('boards').insert({ ...boardData, user_id: profile.id }).select().single();
-      if (data) {
+      const { data, error } = await supabase.from('boards').insert({
+        user_id: profile.id,
+        title:   boardData.title,
+        color:   boardData.color,
+        icon:    boardData.icon,
+      }).select().single();
+
+      if (data && !error) {
+        // استبدل الـ temp بالـ real data
         set((s) => {
           const boards = s.boards.map((b) => b.id === tempId ? data : b);
           AsyncStorage.setItem(STORAGE_KEYS.boards, JSON.stringify(boards));
           return { boards };
         });
+      } else {
+        // فشل — شيل الـ optimistic وبلغ
+        set((s) => {
+          const boards = s.boards.filter((b) => b.id !== tempId);
+          AsyncStorage.setItem(STORAGE_KEYS.boards, JSON.stringify(boards));
+          return { boards };
+        });
+        console.error('addBoard error', error);
       }
+    } else {
+      enqueueOffline('create', 'boards', {
+        user_id: profile.id,
+        title:   boardData.title,
+        color:   boardData.color,
+        icon:    boardData.icon,
+        _localId: tempId,
+      });
     }
   },
 
@@ -207,6 +241,8 @@ export const useAppStore = create<AppState>((set, get) => ({
     });
     if (isOnline) {
       await supabase.from('boards').delete().eq('id', id);
+    } else {
+      enqueueOffline('delete', 'boards', { id });
     }
   },
 
